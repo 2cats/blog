@@ -1,0 +1,52 @@
+How to implement a mapreduce framwork
+
+input data (as kv format):
+	[0, "this is the first line"],
+	[1, "this is the second line"]
+    ...
+
+======
+
+@MAPPER_0
+Got: 
+	[0, "this is first line"]
+Exec:
+    # for each input record, invoke `map_func` to produce intermediate results (1 input, N outputs)
+​    def map_func(input_key, input_value):
+​        for word in input_value.split():
+​            yield [word, 1]
+Output: (according to the hash(key), writing the KV to different intermediate file)
+​	['this', 1]    --hash--> m0_r0
+​	['is', 1]      --hash--> m0_r0
+​   ['the', 1]     --hash--> m0_r1
+​	['first', 1]   --hash--> m0_r1
+​	['line', 1]    --hash--> m0_r1 
+
+@MAPPER_1
+@MAPPER_2
+
+// M*R intermediate file
+========
+
+@REDUCER_0
+Got: (m0_r0, m1_r0, m2_r0, ...)
+Merge Sort:
+	['is', 1]
+	['is', 1]
+    ['is', 1]
+	['this', 1]
+	['this', 1]
+    ['this', 1]
+Exec:
+    def reduce_func(k, input_iter):
+        yield sum(input_iter)
+Output:
+	['is', 3]
+	['this', 3]
+
+@REDUCER_1
+
+
+
+​	
+
